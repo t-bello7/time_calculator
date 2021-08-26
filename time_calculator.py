@@ -2,12 +2,17 @@ def add_time(start, duration, optional=''):
   optional = optional.capitalize()
   days_of_the_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
 
-  #calculate the addition 
-  check_ending = start.strip('1234567890:')
-  start = start.strip(' AMP')
-
+  # get the indexes 
+  index_day = 0
+  if optional in days_of_the_week:
+    index_day = days_of_the_week.index(optional)
   index_col_start =  start.index(':')
   index_col_duration = duration.index(':')
+
+  #calculate the addition 
+  check_ending = start.strip('1234567890: ')
+  start = start.strip(' AMP')
+
 
   start_hours = int(start[0:index_col_start])
   start_mins = int(start[index_col_start+1:]) 
@@ -20,32 +25,61 @@ def add_time(start, duration, optional=''):
   result_hours = (result_min // 60) + start_hours 
 
   #check format
-  count = 0
+  
+  count_day = 0
+  
+  if result_hours == 12 and check_ending == 'AM':
+    check_ending = 'PM'
+  elif check_ending == 'PM' and result_hours == 12:
+    check_ending = 'AM'
+    index_day += 1
+
   if result_hours > 12:
     result_hours = result_hours - 12
-    count += 1
+    count_day += 1
+    cur = result_hours
+    if check_ending == 'PM':
+      check_ending = 'AM'
+      index_day += 1
 
+    elif check_ending == 'AM':
+      check_ending = 'PM'
  
   while result_hours >= 24:
-    count += 1 
+    count_day += 1 
+    if index_day > 6:
+      index_day = 0
+    else:
+      index_day += 1 
+    while cur > 12:
+      cur = cur - 12
+      if check_ending == 'PM':
+        check_ending = 'AM'
+      elif check_ending == 'AM':
+        check_ending = 'PM'
     result_hours = result_hours - 24
-  if result_hours == 0:
+  if result_hours == 0 and check_ending == 'AM':
     result_hours = 12
+    check_ending = 'PM'
+  elif result_hours == 0 and check_ending == 'PM':
+    result_hours = 12
+    check_ending = 'AM'
   result_min = (result_min % 60)
+  if len(str(result_min)) == 1:
+    result_min = '0' + str(result_min)
+  day = days_of_the_week[index_day]
 
-  if optional == '' and count == 0:
+  if optional == '' and count_day == 0 :
     answer = f'{result_hours}:{result_min} {check_ending}'
-  else:
-    answer = f'{result_hours}:{result_min} {check_ending}, {optional} ({count} days later)'
+  elif optional == '' and count_day == 1:
+    answer = f'{result_hours}:{result_min} {check_ending} (next day)'
+  elif optional == '' and count_day != 1:
+    answer = f'{result_hours}:{result_min} {check_ending} ({count_day} days later)'
+  elif optional != '' and count_day == 1:
+    answer = f'{result_hours}:{result_min} {check_ending} {day}'
+  elif optional != '' and count_day != 1:
+    answer = f'{result_hours}:{result_min} {check_ending},{day} ({count_day} days later)'
+  
   return answer
-
-print(add_time('3:00 PM', "3:10"))
-print(add_time('11:30 AM', "2:32", "Monday"))
-print(add_time('11:43 AM', "00:20"))
-print(add_time('10:10 PM', "3:30"))
-print(add_time('11:43 PM', "24:20", "tueSday"))
-print(add_time('6:30 PM', "205:12"))
-
-
 
 
