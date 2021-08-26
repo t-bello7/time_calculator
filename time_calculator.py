@@ -36,18 +36,17 @@ def add_time(start, duration, optional=''):
 
   if result_hours > 12:
     result_hours = result_hours - 12
-    count_day += 1
     cur = result_hours
     if check_ending == 'PM':
       check_ending = 'AM'
       index_day += 1
-
+      count_day += 1
     elif check_ending == 'AM':
       check_ending = 'PM'
  
   while result_hours >= 24:
     count_day += 1 
-    if index_day > 6:
+    if index_day >= 6:
       index_day = 0
     else:
       index_day += 1 
@@ -67,7 +66,17 @@ def add_time(start, duration, optional=''):
   result_min = (result_min % 60)
   if len(str(result_min)) == 1:
     result_min = '0' + str(result_min)
+
+  if result_hours > 12:
+    result_hours = result_hours - 12
+    if check_ending == 'PM':
+      check_ending = 'AM'
+      index_day += 1
+      count_day += 1
+    elif check_ending == 'AM':
+      check_ending = 'PM'
   day = days_of_the_week[index_day]
+  
 
   if optional == '' and count_day == 0 :
     answer = f'{result_hours}:{result_min} {check_ending}'
@@ -75,10 +84,12 @@ def add_time(start, duration, optional=''):
     answer = f'{result_hours}:{result_min} {check_ending} (next day)'
   elif optional == '' and count_day != 1:
     answer = f'{result_hours}:{result_min} {check_ending} ({count_day} days later)'
+  elif optional != '' and count_day == 0:
+    answer = f'{result_hours}:{result_min} {check_ending}, {day}'
   elif optional != '' and count_day == 1:
-    answer = f'{result_hours}:{result_min} {check_ending} {day}'
+    answer = f'{result_hours}:{result_min} {check_ending}, {day} (next day)'
   elif optional != '' and count_day != 1:
-    answer = f'{result_hours}:{result_min} {check_ending},{day} ({count_day} days later)'
+    answer = f'{result_hours}:{result_min} {check_ending}, {day} ({count_day} days later)'
   
   return answer
 
